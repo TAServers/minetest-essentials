@@ -29,8 +29,8 @@ local function tpa(name, target, here)
 		return false, c6 .. "You must specify a name."
 	end
 
-	if name == param then
-		--return false, c6 .. "You cannot teleport to yourself."
+	if name == target then
+		return false, c6 .. "You cannot teleport to yourself."
 	end
 
 	if tparequests[name] ~= nil then
@@ -46,7 +46,7 @@ local function tpa(name, target, here)
 	if player then
 		if targetplayer then
 			tparequests[name] = {
-				timer = timer.after(30, function()
+				timer = timer.once(30000, function()
 					minetest.chat_send_player(name, c6 .. "Request timed out.")
 					tparequests[name] = nil
 					tparequests[target] = nil
@@ -110,7 +110,7 @@ minetest.register_chatcommand("tpdeny", {
 		end
 		local asker = tparequests[name].ask
 		if asker then --if player b accepts players a tpa request to player b
-			timer.cancel(tparequests[asker].timer)
+			timer.remove(tparequests[asker].timer)
 			tparequests[name] = nil
 			tparequests[asker] = nil
 			minetest.chat_send_player(asker, cc .. name .. c6 .. " has denied your teleport request.")
@@ -125,7 +125,7 @@ minetest.register_chatcommand("tpacancel", {
 			return false, c6 .. "You do not have any pending teleportation requests."
 		end
 		local target = tparequests[name].target
-		timer.cancel(tparequests[name].timer)
+		timer.remove(tparequests[name].timer)
 		tparequests[name] = nil
 		tparequests[target] = nil
 		minetest.chat_send_player(target, cc .. asker .. c6 .. " has cancelled the teleport request.")
@@ -141,7 +141,7 @@ minetest.register_chatcommand("tpaccept", {
 		local asker = tparequests[name].ask
 		local here = tparequests[asker].here
 		if asker then --if player b accepts players a tpa request to player b
-			timer.cancel(tparequests[asker].timer)
+			timer.remove(tparequests[asker].timer)
 			tparequests[name] = nil
 			tparequests[asker] = nil
 			minetest.chat_send_player(
@@ -167,7 +167,7 @@ minetest.register_on_leaveplayer(function(playerref)
 	local name = playerref:get_player_name()
 	if tparequests[name] ~= nil then
 		if tparequests[name].timer then
-			timer.cancel(tparequests[name].timer)
+			timer.remove(tparequests[name].timer)
 		end
 		local target = tparequests[name].target or tparequests[name].ask
 		tparequests[target] = nil

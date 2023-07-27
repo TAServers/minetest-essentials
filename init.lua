@@ -4,13 +4,14 @@ essentials = {}
 essentials.storage = minetest.get_mod_storage()
 
 local config = Settings(minetest.get_modpath("essentials") .. "/settings.conf")
-essentials.teleportcooldown = config:get("teleport_cooldown")
+essentials.teleportcooldown = tonumber(config:get("teleport_cooldown")) or 0
 essentials.maxhomes = config:get("max_homes")
 
-essentials.timer = dofile(minetest.get_modpath("essentials") .. "/lib/timer.lua")
-minetest.register_globalstep(function(dt)
-	timer.update(dt)
+local timer = dofile(minetest.get_modpath("essentials") .. "/lib/timer.lua")
+minetest.register_globalstep(function()
+	timer.update()
 end)
+essentials.timer = timer
 
 local lib = { "tp" }
 for k, v in pairs(lib) do

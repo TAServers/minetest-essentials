@@ -17,8 +17,8 @@ minetest.register_chatcommand("home", {
 		local player = minetest.get_player_by_name(name)
 		if player then
 			local homes = minetest.parse_json(storage:get_string(name .. ":homes") or "") or {}
-			if param == nil and #homes == 1 then
-				teleport(player, home.pos)
+			if param == "" and #homes == 1 then
+				teleport(player, homes[1].pos)
 				return true
 			end
 			for k, home in ipairs(homes) do
