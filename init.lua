@@ -5,7 +5,7 @@ essentials.storage = minetest.get_mod_storage()
 
 local config = Settings(minetest.get_modpath("essentials") .. "/settings.conf")
 essentials.teleportcooldown = tonumber(config:get("teleport_cooldown")) or 0
-essentials.maxhomes = config:get("max_homes")
+essentials.maxhomes = tonumber(config:get("max_homes")) or 3
 
 local timer = dofile(minetest.get_modpath("essentials") .. "/lib/timer.lua")
 minetest.register_globalstep(function()

@@ -13,6 +13,8 @@ local function validname(str)
 end
 
 minetest.register_chatcommand("home", {
+	description = "Teleports you to a specified home",
+	params = "[<home>]",
 	func = function(name, param)
 		local player = minetest.get_player_by_name(name)
 		if player then
@@ -22,7 +24,7 @@ minetest.register_chatcommand("home", {
 				return true
 			end
 			for k, home in ipairs(homes) do
-				if home.name == param then
+				if home.name == param or param == "" and home.name == "home" then
 					teleport(player, home.pos)
 					return true
 				end
@@ -34,22 +36,52 @@ minetest.register_chatcommand("home", {
 	end,
 })
 
-minetest.register_chatcommand("sethome", {
+minetest.register_chatcommand("homes", {
+	description = "Lists your homes",
+	params = "[<raw>]",
 	func = function(name, param)
 		local player = minetest.get_player_by_name(name)
 		if player then
-			if not validname(param) then
+			local homes = minetest.parse_json(storage:get_string(name .. ":homes") or "")
+			if homes == nil then
+				return true, c6 .. "You do not have any homes."
+			end
+			--give raw json, in case of failure
+			if param ~= "" then
+				return true, storage:get_string(name .. ":homes")
+			end
+			local names = ""
+			for k, home in ipairs(homes) do
+				names = names .. home.name .. ", "
+			end
+			return true, c6 .. "Homes: " .. cr .. string.sub(names, 0, -3)
+		else
+			return false, "You are not a player."
+		end
+	end,
+})
+
+minetest.register_chatcommand("sethome", {
+	description = "Set a home at your current position",
+	params = "[<home>]",
+	func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+		if player then
+			if validname(param) ~= nil then
 				return false, cc .. "Error: " .. c4 .. "Home names must be alphanumeric."
+			end
+			if param == "" then
+				param = "home"
 			end
 			local homename = string.split(param, " ")[1]
 			local homes = minetest.parse_json(storage:get_string(name .. ":homes") or "") or {}
+			if #homes >= maxhomes then
+				return false, cc .. "Error: " .. c4 .. "Maximum number of homes reached."
+			end
 			for k, home in ipairs(homes) do
 				if home.name == param then
 					return false, cc .. "Error: " .. c4 .. "That home already exists."
 				end
-			end
-			if #homes >= maxhomes then
-				return false, cc .. "Error: " .. c4 .. "Maximum number of homes reached."
 			end
 			--they can possibly set it midair but like, why
 			table.insert(homes, {
@@ -66,20 +98,24 @@ minetest.register_chatcommand("sethome", {
 	end,
 })
 
-minetest.register_chatcommand("homes", {
+minetest.register_chatcommand("delhome", {
+	params = "[<home>]",
 	func = function(name, param)
 		local player = minetest.get_player_by_name(name)
 		if player then
-			local homes = minetest.parse_json(storage:get_string(name .. ":homes") or "")
-			print(homes)
-			if homes == nil then
-				return true, c6 .. "You do not have any homes."
+			local homename = string.split(param, " ")[1]
+			local homes = minetest.parse_json(storage:get_string(name .. ":homes") or "") or {}
+			if #homes == 0 then
+				return false, cc .. "Error: " .. c4 .. "You do not have any set homes."
 			end
-			local names = ""
-			for k, home in ipairs(homes) do
-				names = names .. home.name .. ", "
+			for idx, home in ipairs(homes) do
+				if home.name == param then
+					table.remove(homes, idx)
+					storage:set_string(name .. ":homes", minetest.write_json(homes))
+					return true, c6 .. "Home " .. cc .. param .. c6 .. " deleted"
+				end
 			end
-			return true, c6 .. "Homes: " .. cr .. string.sub(names, 0, -3)
+			return false, cc .. "Error: " .. c4 .. "Could not find a home with that name."
 		else
 			return false, "You are not a player."
 		end

@@ -80,6 +80,7 @@ local function tpa(name, target, here)
 end
 
 minetest.register_chatcommand("spawn", {
+	description = "Teleports you to spawn",
 	func = function(name, param)
 		local player = minetest.get_player_by_name(name)
 		if player then
@@ -92,18 +93,23 @@ minetest.register_chatcommand("spawn", {
 })
 
 minetest.register_chatcommand("tpa", {
+	description = "Ask another player to teleport to them",
+	params = "<player>",
 	func = function(name, param)
 		return tpa(name, param, false)
 	end,
 })
 
 minetest.register_chatcommand("tpahere", {
+	description = "Ask another player to teleport to you",
+	params = "<player>",
 	func = function(name, param)
 		return tpa(name, param, true)
 	end,
 })
 
 minetest.register_chatcommand("tpdeny", {
+	description = "Deny another player's teleport request",
 	func = function(name, param)
 		if tparequests[name] == nil then
 			return false, c6 .. "You do not have any pending teleportation requests."
@@ -120,6 +126,7 @@ minetest.register_chatcommand("tpdeny", {
 })
 
 minetest.register_chatcommand("tpacancel", {
+	description = "Cancel your ongoing teleport request",
 	func = function(name, param)
 		if tparequests[name] == nil then
 			return false, c6 .. "You do not have any pending teleportation requests."
@@ -134,6 +141,7 @@ minetest.register_chatcommand("tpacancel", {
 })
 
 minetest.register_chatcommand("tpaccept", {
+	description = "Accept the teleport request",
 	func = function(name, param)
 		if tparequests[name] == nil then
 			return false, c6 .. "You do not have any pending teleportation requests."

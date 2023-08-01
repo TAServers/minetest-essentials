@@ -10,7 +10,7 @@ local timer = {}
 local timers = {}
 local incrementor = 0
 local function time()
-    return os.clock()*1000
+	return os.clock() * 1000
 end
 
 function timer.update()
@@ -54,6 +54,7 @@ function timer.remove(id)
 	end
 	return false
 end
+
 function timer.timers()
 	return timers
 end
